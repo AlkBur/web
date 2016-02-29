@@ -78,18 +78,14 @@ int handle_request(int clientfd)
        //std::cout << "No file path found in URI" << uri << "\n";
        return -1;
    }
-   //if( *file_path == '/' )
-   //{
-   //   ++file_path;
-   //    return -1;
-   //}
-   //syslog(LOG_ERR, file_path);
 
    std::string sUsedFileName = file_path;
 
-   if(sUsedFileName=="/" || sUsedFileName.empty()){
+   if(sUsedFileName.empty()){
        //return -1;
        sUsedFileName = "/index.html";
+   }else if (sUsedFileName[sUsedFileName.size()-1]=='/'){
+       sUsedFileName += "index.html";
    }
 
    sUsedFileName = globalArgs.directory + sUsedFileName;
@@ -320,4 +316,3 @@ int main(int argc, char* argv[])
 
     return 0;
 }
-
