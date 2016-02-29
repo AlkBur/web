@@ -86,8 +86,20 @@ int handle_request(int clientfd)
    std::string sUsedFileName = globalArgs.directory + file_path;
    syslog(LOG_ERR, sUsedFileName.c_str());
 
+    int NewHandle = open(sUsedFileName.c_str(), O_RDONLY);
+    if(NewHandle==-1){
+        return -1;
+    }
+    int NewSize = lseek(NewHandle, 0, SEEK_SET);
+    if (NewSize == -1 || (NewSize = lseek(NewHandle, 0, SEEK_END)) == -1 || lseek(NewHandle, 0, SEEK_SET) == -1)
+    {
+        close(NewHandle);
+        return -1;
+    }
+    off_t Offset = 0;
+    sendfile(clientfd, NewHandle, &Offset, NewSize-Offset);
 
-
+/*
    int file_d = open(sUsedFileName.c_str(), O_RDONLY);
    if( file_d >= 0 )
    {
@@ -110,6 +122,7 @@ int handle_request(int clientfd)
    {
        return -1;
    }
+   */
    return 0;
 }
 
