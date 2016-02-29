@@ -77,14 +77,27 @@ int handle_request(int clientfd)
        //std::cout << "No file path found in URI" << uri << "\n";
        return -1;
    }
-   if( *file_path == '/' )
-   {
+   //if( *file_path == '/' )
+   //{
    //   ++file_path;
-       return -1;
-   }
+   //    return -1;
+   //}
    syslog(LOG_ERR, file_path);
 
    std::string sUsedFileName = globalArgs.directory + file_path;
+   if(sUsedFileName=="/"){
+       return -1;
+   }
+
+    struct stat buf;
+    if(stat("child.exe", &buf)!=0){
+        return -1;
+    }
+    if (buf.st_mode & S_IFDIR){
+        return -1;
+    }
+
+
    syslog(LOG_ERR, sUsedFileName.c_str());
 
     int NewHandle = open(sUsedFileName.c_str(), O_RDONLY);
