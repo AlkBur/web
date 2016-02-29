@@ -1,0 +1,8 @@
+#!/bin/bash
+
+cp /dev/null log.txt
+cp /dev/null error.txt
+
+killall WebServer
+
+exec ./WebServer $@ >> log.txt 2>> error.txt
