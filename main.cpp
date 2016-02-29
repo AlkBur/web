@@ -12,6 +12,7 @@
 #include <sys/syslog.h>
 
 #include <netinet/tcp.h>
+#include <signal.h>
 
 #include <sys/stat.h>
 
@@ -84,16 +85,20 @@ int handle_request(int clientfd)
    //}
    //syslog(LOG_ERR, file_path);
 
-   std::string sUsedFileName = globalArgs.directory + file_path;
-//   if(sUsedFileName=="/"){
-//       return -1;
-//   }
+   std::string sUsedFileName = file_path;
 
-    struct stat buf;
-    if(stat(sUsedFileName.c_str(), &buf)!=0){\
-        syslog(LOG_ERR, "stat");
-        return -1;
-    }
+   if(sUsedFileName=="/" || sUsedFileName.empty()){
+       //return -1;
+       sUsedFileName = "/index.html";
+   }
+
+   sUsedFileName = globalArgs.directory + sUsedFileName;
+
+   struct stat buf;
+   if(stat(sUsedFileName.c_str(), &buf)!=0){\
+       syslog(LOG_ERR, "stat");
+       return -1;
+   }
     if (buf.st_mode & S_IFDIR){
         syslog(LOG_ERR, "S_IFDIR");
         return -1;
@@ -276,6 +281,13 @@ void daemonize() {
 
 int main(int argc, char* argv[])
 {
+    struct sigaction sa;
+    sigset_t newset;
+    sigemptyset(&newset);
+    sigaddset(&newset, SIGHUP);
+    sigprocmask(SIG_BLOCK, &newset, 0);
+
+
     std::cout << "Параметры запуска:";
     for(int i=1; i<argc; i++)
         std::cout << " " << argv[i];
