@@ -82,18 +82,20 @@ int handle_request(int clientfd)
    //   ++file_path;
    //    return -1;
    //}
-   syslog(LOG_ERR, file_path);
+   //syslog(LOG_ERR, file_path);
 
    std::string sUsedFileName = globalArgs.directory + file_path;
-   if(sUsedFileName=="/"){
-       return -1;
-   }
+//   if(sUsedFileName=="/"){
+//       return -1;
+//   }
 
     struct stat buf;
-    if(stat("child.exe", &buf)!=0){
+    if(stat(sUsedFileName.c_str(), &buf)!=0){\
+        syslog(LOG_ERR, "stat");
         return -1;
     }
     if (buf.st_mode & S_IFDIR){
+        syslog(LOG_ERR, "S_IFDIR");
         return -1;
     }
 
