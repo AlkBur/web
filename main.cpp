@@ -9,6 +9,7 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <sys/epoll.h>
+#include <sys/syslog.h>
 
 #include <netinet/tcp.h>
 
@@ -76,11 +77,18 @@ int handle_request(int clientfd)
        //std::cout << "No file path found in URI" << uri << "\n";
        return 0;
    }
-   if( *file_path == '/' )
-   {
-       ++file_path;
-   }
-   int file_d = open(file_path, O_RDONLY);
+   //if( *file_path == '/' )
+   //{
+   //   ++file_path;
+   //}
+   syslog(LOG_ERR, file_path);
+
+   std::string sUsedFileName = globalArgs.directory + file_path;
+   syslog(LOG_ERR, sUsedFileName.c_str());
+
+
+
+   int file_d = open(sUsedFileName.c_str(), O_RDONLY);
    if( file_d >= 0 )
    {
        struct stat file_stat;
@@ -160,6 +168,9 @@ void *server_thread(void *fd) {
 }
 
 void main_prog() {
+    openlog("WebServer", 0, LOG_USER);
+    syslog(LOG_ERR, "-----Statrt WebServer-------");
+
     /* Создание нового потокового сокета */
     int sock = socket( AF_INET, SOCK_STREAM, IPPROTO_TCP );
 
@@ -185,11 +196,13 @@ void main_prog() {
         serveraddr.sin_addr.s_addr = inet_addr(globalArgs.ip.c_str());
 
     if (bind(sock, (const struct sockaddr *)&serveraddr, sizeof(serveraddr)) < 0) {
-        //std::cerr << "bind failed " << strerror(errno) << std::endl;
+        syslog(LOG_ERR, "Error bind");
+    //std::cerr << "bind failed " << strerror(errno) << std::endl;
         exit(EXIT_FAILURE);
     }
 
     if (listen(sock, 64) < 0) {
+        syslog(LOG_ERR, "Error listen");
         //std::cerr << "listen " << strerror(errno) << std::endl;
         exit(EXIT_FAILURE);
     }
@@ -200,6 +213,7 @@ void main_prog() {
         int status = pthread_create(&th[t_cnt], nullptr, (void*(*)(void *)) server_thread,(void *)&sock);
         if( status != 0 ) {
             //perror( "pthread_create" );
+        syslog(LOG_ERR, "pthread_create");
             exit(EXIT_FAILURE);
         }
     };
