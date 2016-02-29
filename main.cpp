@@ -45,7 +45,7 @@ int handle_request(int clientfd)
    }
 
    if (n == 0) {
-       return 0;
+       return -1;
    }
 
    readbuff[n] = '\0';
@@ -55,32 +55,33 @@ int handle_request(int clientfd)
    if( command_line == NULL )
    {
        //std::cout << "No comamnd line found in " << readbuff << "\n";
-       return 0;
+       return -1;
    }
    char* method = strtok_r(command_line, "\t ", &save_ptr);
    if( method == NULL )
    {
        //std::cout << "No comamnd (GET) found in " << command_line << "\n";
-       return 0;
+       return -1;
    }
    //std::cout << "method :" << method << ":\n";
    char* uri = strtok_r(NULL, "\t ", &save_ptr);
    if( uri == NULL )
    {
        //std::cout << "No URI found in " << command_line << "\n";
-       return 0;
+       return -1;
    }
    //std::cout << "URI :" << uri << ":\n";
    char* file_path = strtok_r(uri, "?", &save_ptr);
    if( file_path == NULL )
    {
        //std::cout << "No file path found in URI" << uri << "\n";
-       return 0;
+       return -1;
    }
-   //if( *file_path == '/' )
-   //{
+   if( *file_path == '/' )
+   {
    //   ++file_path;
-   //}
+       return -1;
+   }
    syslog(LOG_ERR, file_path);
 
    std::string sUsedFileName = globalArgs.directory + file_path;
